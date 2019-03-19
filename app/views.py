@@ -5,11 +5,13 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 
-from app import app, mail
-from app.forms import ContactForm
-from flask import render_template, request, redirect, url_for, flash
-from flask_mail import Message
-
+import os, datetime
+from app import app
+from app import db
+from flask import render_template, request, redirect, url_for, flash, session, abort
+from app.forms import UserForm
+from werkzeug.utils import secure_filename
+from app.models import Profile
 
 
 @app.route('/')
@@ -17,45 +19,54 @@ def home():
     """Render website's home page."""
     return render_template('home.html')
 
-@app.route('/about/')
-def about():
-    """Render the website's about page."""
-    return render_template('about.html', name="Mary Jane")
-    
-@app.route('/contact/', methods = ['GET','POST'])
-def contact():
-    form = ContactForm()
-    
+
+@app.route('/profiles/')
+def profiles():
+    """Render all User pages."""
+    return render_template('profiles.html', accounts = db.session.query(Profile).all())
+
+
+@app.route('/profile/', methods=['GET', 'POST'])
+def profile():
+    """Render the Add User page."""
+    form = UserForm()
     if request.method == 'POST':
         if form.validate_on_submit():
+            fname = request.form['fname']
+            lname = request.form['lname']
+            email = request.form['email']
+            location = request.form['location']
+            gender = request.form['gender']
+            bio = request.form['bio']
+            currentdate = datetime.datetime.now()
+            date = currentdate.strftime("%B %d, %Y")
+
+            #photo = form.photo.data
             
-            name = form.name.data
-            subject = form.subject.data
-            email = form.email.data
-            message = form.message.data
+            
+            file = request.files['photo']
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
             
-            flash('Form Successful.')
-            msg = Message(subject, sender=(name, email),
-            recipients=["998dbad431-cb8e8f@inbox.mailtrap.io"])
-            msg.body = message
-            mail.send(msg)
+            user = Profile(fname, lname, gender, email, location, bio, filename, date)
+            db.session.add(user)
+            db.session.commit()
             
-            return redirect('home.html', name = name, message = message, email = email, subject = subject)
-    
-    
-    return render_template('contact.html', form = form)
+            flash('Succesfully Uploaded', 'success')
+            return redirect(url_for('profiles'))
+            
+    #flash_errors(form)
+    return render_template('profile.html', form=form)
 
 
+@app.route("/profile/<accountid>")
+def accountID(accountid):
+    return render_template("user.html", ac=db.session.query(Profile).filter_by(id=int(accountid)).first())
+    
 ###
 # The functions below should be applicable to all Flask apps.
 ###
-
-@app.route('/<file_name>.txt')
-def send_text_file(file_name):
-    """Send your static text file."""
-    file_dot_text = file_name + '.txt'
-    return app.send_static_file(file_dot_text)
 
 
 @app.after_request

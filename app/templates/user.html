@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block main %}
+  <div class="contain">
+    <div class="card mb-3 borderCol" style="max-width: 480px;">
+        <div class="col-md-4">
+          <img src="{{ url_for('static', filename="uploads/"+ac.photo) }}" class="card-img image" alt="...">
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <p class="card-text heading"> <strong> {{ac.fname}} {{ac.lname}} </strong></p>
+                <p class="card-text description text-muted">{{ac.email}} </p>
+                <p class="card-text description text-muted">{{ac.location}} </p>
+                <p class="card-text description text-muted">Joined on {{ac.date}} </p>
+            </div>
+        </div>
+      </div>
+    </div>
+    
+{% endblock %} 

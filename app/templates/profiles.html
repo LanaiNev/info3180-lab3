@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <h1>Profiles</h1>
+    {% for account in accounts %}
+        <div class="card mb-3 borderCol" style="max-width: 580px;">
+          <div class="row no-gutters">
+            <div class="col-md-4">
+              <img src="{{ url_for('static', filename="uploads/"+account.photo) }}" class="card-img" alt="...">
+            </div>
+            <div class="col-md-5">
+                <div class="card-body">
+                    <p class="card-text description"> <strong> {{account.fname}} {{account.lname}} </strong> </p>
+                    <p class="card-text description"><i class="far fa-user"></i> {{account.gender}} </p>
+                    <p class="card-text description"><i class="far fa-user"></i> {{account.location}} </p>
+                </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card-body">
+                <button class="btn btn-sm btn-primary px-4" type="submit" onclick="window.location.href='{{ url_for( 'accountID' , accountid=account.id ) }}';">View Profile</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+
+{% endblock %} 
